@@ -294,17 +294,35 @@ export default function ProfilePage() {
                         <div>
                           <h3 className="text-sm font-medium text-gray-900">LinkedIn Connection</h3>
                           <p className="mt-1 text-sm text-gray-500">
-                            Connect your LinkedIn account to enable content generation.
+                            {linkedinProfile.connected 
+                              ? "Your LinkedIn account is connected." 
+                              : "Connect your LinkedIn account to enable content generation."}
                           </p>
+                          {linkedinProfile.connected && (
+                            <p className="mt-1 text-sm text-green-600 flex items-center">
+                              <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                              Connected as {profileData.linkedinProfile?.name || profileData.fullName}
+                            </p>
+                          )}
                         </div>
-                        <button
-                          onClick={handleLinkedInConnect}
-                          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          <LinkIcon className="h-4 w-4 mr-2 text-gray-400" />
-                          Connect LinkedIn
-                          <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-1 text-gray-400" />
-                        </button>
+                        {linkedinProfile.connected ? (
+                          <button
+                            onClick={handleLinkedInDisconnect}
+                            className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          >
+                            <LinkIcon className="h-4 w-4 mr-2 text-red-400" />
+                            Disconnect LinkedIn
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleLinkedInConnect}
+                            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          >
+                            <LinkIcon className="h-4 w-4 mr-2 text-gray-400" />
+                            Connect LinkedIn
+                            <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-1 text-gray-400" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
