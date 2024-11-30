@@ -126,7 +126,7 @@ function DashboardContent() {
             <button
               onClick={() => router.push('/projects/new')}
               type="button"
-              className="ml-3 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="ml-3 inline-flex items-center rounded-md bg-[#196BF1] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#1559cc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#196BF1]"
             >
               New Project
             </button>
@@ -157,10 +157,10 @@ function DashboardContent() {
             <h2 className="text-lg font-medium text-gray-900">Recent Projects</h2>
             <button
               onClick={() => router.push('/projects')}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#196BF1] bg-[#196BF1]/10 rounded-md hover:bg-[#196BF1]/20"
             >
               View All Projects
-              <span className="ml-2 text-indigo-500">({filteredProjects.length})</span>
+              <span className="ml-2 text-[#196BF1]">({filteredProjects.length})</span>
             </button>
           </div>
 
@@ -181,7 +181,7 @@ function DashboardContent() {
                 <p className="mt-2 text-gray-500">Get started by creating your first project.</p>
                 <button
                   onClick={() => router.push('/projects/new')}
-                  className="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#196BF1] hover:bg-[#1559cc] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#196BF1]"
                 >
                   Create Project
                 </button>

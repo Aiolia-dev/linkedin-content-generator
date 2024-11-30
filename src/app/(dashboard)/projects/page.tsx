@@ -158,14 +158,14 @@ export default function ProjectsPage() {
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={`inline-flex items-center px-3 py-2 border rounded-md text-sm font-medium transition-colors duration-200 ${
                 isFilterOpen || filters.type || filters.status
-                  ? 'border-blue-500 text-blue-600 bg-blue-50 hover:bg-blue-100'
+                  ? 'border-[#196BF1] text-[#196BF1] bg-[#196BF1]/10 hover:bg-[#196BF1]/20'
                   : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
               }`}
             >
               <FunnelIcon className="h-4 w-4 mr-2" />
               Filter
               {(filters.type || filters.status) && (
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#196BF1]/10 text-[#196BF1]">
                   {Object.values(filters).filter(Boolean).length}
                 </span>
               )}
@@ -179,7 +179,7 @@ export default function ProjectsPage() {
                     {(filters.type || filters.status) && (
                       <button
                         onClick={clearFilters}
-                        className="text-xs text-blue-600 hover:text-blue-500 font-medium"
+                        className="text-xs text-[#196BF1] hover:text-[#1559cc] font-medium"
                       >
                         Clear all filters
                       </button>
@@ -202,7 +202,7 @@ export default function ProjectsPage() {
                               value={value}
                               checked={filters.type === value}
                               onChange={(e) => handleFilterChange('type', e.target.value)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                              className="h-4 w-4 text-[#196BF1] border-gray-300 focus:ring-[#196BF1]"
                             />
                             <span className="ml-2 text-sm text-gray-700">{label}</span>
                           </label>
@@ -214,7 +214,7 @@ export default function ProjectsPage() {
                             value=""
                             checked={filters.type === null}
                             onChange={() => handleFilterChange('type', null)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-4 w-4 text-[#196BF1] border-gray-300 focus:ring-[#196BF1]"
                           />
                           <span className="ml-2 text-sm text-gray-700">All types</span>
                         </label>
@@ -238,7 +238,7 @@ export default function ProjectsPage() {
                               value={status}
                               checked={filters.status === status}
                               onChange={(e) => handleFilterChange('status', e.target.value)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                              className="h-4 w-4 text-[#196BF1] border-gray-300 focus:ring-[#196BF1]"
                             />
                             <span className="ml-2 text-sm text-gray-700">
                               {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
@@ -252,7 +252,7 @@ export default function ProjectsPage() {
                             value=""
                             checked={filters.status === null}
                             onChange={() => handleFilterChange('status', null)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            className="h-4 w-4 text-[#196BF1] border-gray-300 focus:ring-[#196BF1]"
                           />
                           <span className="ml-2 text-sm text-gray-700">All statuses</span>
                         </label>
@@ -280,7 +280,7 @@ export default function ProjectsPage() {
           <ViewToggle view={view} onViewChange={setView} />
           <button
             onClick={() => router.push('/projects/new')}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#196BF1] hover:bg-[#1559cc] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#196BF1]"
           >
             New Project
           </button>
@@ -292,22 +292,22 @@ export default function ProjectsPage() {
           <span className="text-sm text-gray-500">Active filters:</span>
           <div className="flex items-center space-x-2">
             {filters.type && (
-              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-[#196BF1]/10 text-[#196BF1]">
                 {PROJECT_TYPE_LABELS[filters.type as ProjectType]}
                 <button
                   onClick={() => handleFilterChange('type', null)}
-                  className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:outline-none"
+                  className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[#196BF1]/70 hover:bg-[#196BF1]/20 hover:text-[#196BF1] focus:outline-none"
                 >
                   <XMarkIcon className="w-4 h-4" />
                 </button>
               </span>
             )}
             {filters.status && (
-              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-[#196BF1]/10 text-[#196BF1]">
                 {filters.status.charAt(0).toUpperCase() + filters.status.slice(1)}
                 <button
                   onClick={() => handleFilterChange('status', null)}
-                  className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500 focus:outline-none"
+                  className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[#196BF1]/70 hover:bg-[#196BF1]/20 hover:text-[#196BF1] focus:outline-none"
                 >
                   <XMarkIcon className="w-4 h-4" />
                 </button>
@@ -326,7 +326,7 @@ export default function ProjectsPage() {
               <div className="mt-6">
                 <button
                   onClick={() => router.push('/projects/new')}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#196BF1] hover:bg-[#1559cc] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#196BF1]"
                 >
                   New Project
                 </button>
@@ -339,7 +339,7 @@ export default function ProjectsPage() {
               <div className="mt-6">
                 <button
                   onClick={clearFilters}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#196BF1]"
                 >
                   Clear filters
                 </button>
@@ -378,10 +378,10 @@ export default function ProjectsPage() {
                             setProjectToEdit(project);
                             setIsEditModalOpen(true);
                           }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-blue-50 rounded-full"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[#196BF1]/10 rounded-full"
                           title="Edit project"
                         >
-                          <PencilIcon className="h-5 w-5 text-blue-500" />
+                          <PencilIcon className="h-5 w-5 text-[#196BF1]" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteClick(e, project)}
@@ -423,7 +423,7 @@ export default function ProjectsPage() {
                       <span className="text-sm text-gray-500">
                         {new Date(project.createdAt).toLocaleDateString()}
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#196BF1]/10 text-[#196BF1]">
                         {project.status}
                       </span>
                     </div>

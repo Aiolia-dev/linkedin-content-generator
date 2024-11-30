@@ -100,8 +100,8 @@ export default function DashboardLayout({
         </nav>
       </div>
 
-      {/* Desktop header */}
-      <header className="bg-blue-600 shadow-sm">
+      {/* Desktop header - now fixed */}
+      <header className="fixed top-0 right-0 left-0 z-30 bg-[#196BF1] shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between">
             <div className="flex">
@@ -122,8 +122,9 @@ export default function DashboardLayout({
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Desktop sidebar */}
+      {/* Main container with adjusted padding for fixed header */}
+      <div className="flex flex-1 pt-16 overflow-hidden">
+        {/* Desktop sidebar - adjusted top position */}
         <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:pt-16">
           <div className="flex-1 flex flex-col min-h-0 bg-gray-800">
             <nav className="mt-5 px-2 flex-1">
@@ -149,7 +150,7 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        {/* Main content */}
+        {/* Main content - adjusted for fixed header */}
         <main className="flex-1 overflow-auto lg:pl-64">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}

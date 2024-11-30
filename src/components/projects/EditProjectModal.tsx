@@ -175,7 +175,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                 <div className="absolute right-0 top-0 pr-4 pt-4">
                   <button
                     type="button"
-                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#196BF1] focus:ring-offset-2"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
@@ -199,7 +199,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                             id="subject"
                             value={formData.subject}
                             onChange={handleChange}
-                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900"
+                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
                           />
                         </div>
 
@@ -213,7 +213,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                             id="keywords"
                             value={formData.keywords}
                             onChange={handleChange}
-                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900"
+                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
                             placeholder="Separate keywords with commas"
                           />
                         </div>
@@ -227,7 +227,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                               Tone
                             </Listbox.Label>
                             <div className="relative mt-1">
-                              <Listbox.Button className="relative w-full h-10 cursor-pointer rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm">
+                              <Listbox.Button className="relative w-full h-10 cursor-pointer rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-[#196BF1] focus:outline-none focus:ring-1 focus:ring-[#196BF1] sm:text-sm">
                                 <span className="block truncate text-gray-900">
                                   {(toneOptions.find(t => t.name === formData.tone) || { name: 'Select a tone' }).name}
                                 </span>
@@ -247,7 +247,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                       key={tone.id}
                                       className={({ active }) =>
                                         `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
-                                          active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'
+                                          active ? 'bg-[#196BF1]/10 text-[#196BF1]' : 'text-gray-900'
                                         }`
                                       }
                                       value={tone}
@@ -263,7 +263,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                             </span>
                                           </div>
                                           {selected ? (
-                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600">
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#196BF1]">
                                               <CheckIcon className="h-5 w-5" aria-hidden="true" />
                                             </span>
                                           ) : null}
@@ -287,7 +287,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                             id="targetAudience"
                             value={formData.targetAudience}
                             onChange={handleChange}
-                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900"
+                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
                           />
                         </div>
 
@@ -302,7 +302,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                 key={option.id}
                                 className={`relative flex cursor-pointer rounded-lg border ${
                                   formData.contentLength.type === option.id
-                                    ? 'border-blue-500 bg-blue-50'
+                                    ? 'border-[#196BF1] bg-[#196BF1]/5'
                                     : 'border-gray-300'
                                 } p-4 shadow-sm focus:outline-none`}
                                 onClick={() => handleContentLengthChange(option.id)}
@@ -311,12 +311,12 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                   <div className="flex items-center">
                                     <div className="text-sm">
                                       <p className={`font-medium ${
-                                        formData.contentLength.type === option.id ? 'text-blue-900' : 'text-gray-900'
+                                        formData.contentLength.type === option.id ? 'text-[#196BF1]' : 'text-gray-900'
                                       }`}>
                                         {option.name}
                                       </p>
                                       <p className={`${
-                                        formData.contentLength.type === option.id ? 'text-blue-700' : 'text-gray-500'
+                                        formData.contentLength.type === option.id ? 'text-[#196BF1]/80' : 'text-gray-500'
                                       }`}>
                                         {option.description}
                                       </p>
@@ -325,7 +325,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                   <div
                                     className={`h-5 w-5 rounded-full border flex items-center justify-center ${
                                       formData.contentLength.type === option.id
-                                        ? 'border-blue-500 bg-blue-500'
+                                        ? 'border-[#196BF1] bg-[#196BF1]'
                                         : 'border-gray-300 bg-white'
                                     }`}
                                   >
@@ -343,7 +343,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                             <div
                               className={`relative flex cursor-pointer rounded-lg border ${
                                 formData.contentLength.type === 'custom'
-                                  ? 'border-blue-500 bg-blue-50'
+                                  ? 'border-[#196BF1] bg-[#196BF1]/5'
                                   : 'border-gray-300'
                               } p-4 shadow-sm focus:outline-none`}
                               onClick={() => handleContentLengthChange('custom')}
@@ -352,12 +352,12 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                 <div className="flex items-center">
                                   <div className="text-sm">
                                     <p className={`font-medium ${
-                                      formData.contentLength.type === 'custom' ? 'text-blue-900' : 'text-gray-900'
+                                      formData.contentLength.type === 'custom' ? 'text-[#196BF1]' : 'text-gray-900'
                                     }`}>
                                       Custom
                                     </p>
                                     <p className={`${
-                                      formData.contentLength.type === 'custom' ? 'text-blue-700' : 'text-gray-500'
+                                      formData.contentLength.type === 'custom' ? 'text-[#196BF1]/80' : 'text-gray-500'
                                     }`}>
                                       Specify word count
                                     </p>
@@ -366,7 +366,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                 <div
                                   className={`h-5 w-5 rounded-full border flex items-center justify-center ${
                                     formData.contentLength.type === 'custom'
-                                      ? 'border-blue-500 bg-blue-500'
+                                      ? 'border-[#196BF1] bg-[#196BF1]'
                                       : 'border-gray-300 bg-white'
                                   }`}
                                 >
@@ -389,7 +389,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                     max="2000"
                                     value={customWordCount ?? ''}
                                     onChange={(e) => handleCustomWordCountChange(e.target.value ? Number(e.target.value) : null)}
-                                    className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900"
+                                    className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
                                     placeholder="Enter word count (50-2000)"
                                   />
                                 </div>
@@ -409,7 +409,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                               }
                               onClose();
                             }}
-                            className="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3"
+                            className="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#196BF1] hover:bg-[#1559cc] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#196BF1] sm:ml-3"
                           >
                             <SparklesIcon className="h-4 w-4 mr-2" />
                             Generate Content
@@ -418,13 +418,13 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                         <button
                           type="submit"
                           disabled={isSaving}
-                          className="w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:text-sm"
+                          className="w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#196BF1] sm:text-sm"
                         >
                           {isSaving ? 'Saving...' : 'Save Changes'}
                         </button>
                         <button
                           type="button"
-                          className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                          className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#196BF1] sm:text-sm"
                           onClick={onClose}
                         >
                           Cancel
