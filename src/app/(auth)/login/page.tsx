@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { auth, db } from '@/lib/firebase/config';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -14,7 +15,7 @@ export default function LoginPage() {
 
   const createSession = async (user: any) => {
     try {
-      const idToken = await user.getIdToken(true); // Force refresh token
+      const idToken = await user.getIdToken(true);
       const response = await fetch('/api/auth/session', {
         method: 'POST',
         headers: {
@@ -35,17 +36,43 @@ export default function LoginPage() {
     }
   };
 
+  const saveUserProfile = async (user: any) => {
+    const userRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      // Nouveau utilisateur - créer un nouveau document
+      await setDoc(userRef, {
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        onboardingCompleted: false,
+      });
+    } else {
+      // Utilisateur existant - mettre à jour les informations
+      const userData = userDoc.data();
+      await updateDoc(userRef, {
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        updatedAt: new Date(),
+        // Ne pas écraser les autres données existantes
+        ...(!userData.onboardingCompleted && { onboardingCompleted: false }),
+      });
+    }
+  };
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
     
     try {
-      // First try to authenticate with Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('Firebase auth successful');
       
-      // Then try to create a session
       await createSession(userCredential.user);
       console.log('Session created successfully');
       
@@ -78,10 +105,20 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       console.log('Google sign in successful:', result.user.email);
       
+      // Sauvegarder les informations de profil Google
+      await saveUserProfile(result.user);
+      console.log('User profile saved');
+      
       await createSession(result.user);
       console.log('Session created successfully');
       
-      router.push('/dashboard');
+      // Rediriger vers onboarding si nouveau utilisateur
+      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+      if (!userDoc.exists() || !userDoc.data().onboardingCompleted) {
+        router.push('/onboarding');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error: any) {
       console.error('Google sign in error:', error);
       if (error.code === 'auth/popup-closed-by-user') {

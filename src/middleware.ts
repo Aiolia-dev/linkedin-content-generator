@@ -33,7 +33,8 @@ export async function middleware(request: NextRequest) {
 
       const data = await response.json();
 
-      if (!data.isAuthenticated) {
+      if (!data.isAuthenticated || data.userDeleted) {
+        // Si l'utilisateur n'est plus authentifié ou a été supprimé, on supprime le cookie et on redirige vers login
         const response = NextResponse.redirect(new URL('/login', request.url));
         response.cookies.delete('session');
         return response;

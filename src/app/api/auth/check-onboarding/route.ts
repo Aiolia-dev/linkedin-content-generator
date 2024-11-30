@@ -11,6 +11,15 @@ export async function POST(request: Request) {
     }
 
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+    
+    // Vérifier si l'utilisateur existe toujours dans Firebase Auth
+    try {
+      await adminAuth.getUser(decodedClaims.uid);
+    } catch (error) {
+      console.error('User no longer exists:', error);
+      return NextResponse.json({ isAuthenticated: false, userDeleted: true }, { status: 401 });
+    }
+    
     const userDoc = await adminDb.collection('users').doc(decodedClaims.uid).get();
     const userData = userDoc.data();
 

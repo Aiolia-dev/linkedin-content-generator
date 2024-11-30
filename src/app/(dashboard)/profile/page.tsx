@@ -25,13 +25,17 @@ export default function ProfilePage() {
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
-        const data = userDoc.data() as OnboardingData;
-        console.log('Profile Data:', {
-          linkedinProfile: data.linkedinProfile,
-          hasProfileUrl: data.linkedinProfile?.profileUrl ? 'yes' : 'no',
-          profileUrl: data.linkedinProfile?.profileUrl
+        const data = userDoc.data();
+        setProfileData({
+          ...data,
+          displayName: data.displayName || '',
+          photoURL: data.photoURL || '',
+          email: data.email || '',
+          linkedinProfile: data.linkedinProfile || { connected: false, profileUrl: '', accessToken: '' },
+          contentPreferences: data.contentPreferences || { tone: 'professional', frequency: 'weekly', topics: [] },
+          preferences: data.preferences || { notifications: 'important', aiAssistance: 'balanced' },
         });
-        setProfileData(data);
+        console.log('Profile Data:', data);
       }
     } catch (error) {
       console.error('Error fetching profile data:', error);
@@ -182,116 +186,148 @@ export default function ProfilePage() {
   return (
     <div className="py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
-          <Tab.List className="flex space-x-4 border-b border-gray-200 mb-6">
-            <Tab
-              className={({ selected }) =>
-                clsx(
-                  'px-4 py-2 text-sm font-medium focus:outline-none',
-                  selected
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                )
-              }
+        <div className="bg-white shadow-sm rounded-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-4">
+              {profileData?.photoURL ? (
+                <img
+                  src={profileData.photoURL}
+                  alt="Profile"
+                  className="h-12 w-12 rounded-full"
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 text-xl">
+                    {profileData?.displayName?.charAt(0) || '?'}
+                  </span>
+                </div>
+              )}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {profileData?.displayName || 'No name set'}
+                </h2>
+                <p className="text-sm text-gray-500">{profileData?.email || 'No email set'}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Profile Information
-            </Tab>
-            <Tab
-              className={({ selected }) =>
-                clsx(
-                  'px-4 py-2 text-sm font-medium focus:outline-none',
-                  selected
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                )
-              }
-            >
-              Personas
-            </Tab>
-          </Tab.List>
+              <PencilIcon className="h-4 w-4" />
+              <span>Edit Profile</span>
+            </button>
+          </div>
+          <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
+            <Tab.List className="flex space-x-4 border-b border-gray-200 mb-6">
+              <Tab
+                className={({ selected }) =>
+                  clsx(
+                    'px-4 py-2 text-sm font-medium focus:outline-none',
+                    selected
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  )
+                }
+              >
+                Profile Information
+              </Tab>
+              <Tab
+                className={({ selected }) =>
+                  clsx(
+                    'px-4 py-2 text-sm font-medium focus:outline-none',
+                    selected
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  )
+                }
+              >
+                Personas
+              </Tab>
+            </Tab.List>
 
-          <Tab.Panels>
-            <Tab.Panel>
-              {/* Profile Information Content */}
-              <div className="bg-white shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h2 className="text-lg font-medium text-gray-900">Profile Information</h2>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Update your profile information and LinkedIn connection.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setIsEditModalOpen(true)}
-                      className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      <PencilIcon className="h-4 w-4 mr-2" />
-                      Edit Profile
-                    </button>
-                  </div>
-
-                  {profileData && (
-                    <div className="mt-6 border-t border-gray-200 pt-6">
-                      <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-                        <div>
-                          <dt className="text-sm font-medium text-gray-500">Full Name</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{profileData.fullName}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-sm font-medium text-gray-500">Job Title</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{profileData.jobTitle}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-sm font-medium text-gray-500">Industry</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{profileData.industry}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-sm font-medium text-gray-500">Company</dt>
-                          <dd className="mt-1 text-sm text-gray-900">{profileData.company}</dd>
-                        </div>
-                      </dl>
-                    </div>
-                  )}
-
-                  <div className="mt-6 border-t border-gray-200 pt-6">
-                    <div className="flex items-center justify-between">
+            <Tab.Panels>
+              <Tab.Panel>
+                {/* Profile Information Content */}
+                <div className="bg-white shadow rounded-lg">
+                  <div className="px-4 py-5 sm:p-6">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="text-sm font-medium text-gray-900">LinkedIn Connection</h3>
+                        <h2 className="text-lg font-medium text-gray-900">Profile Information</h2>
                         <p className="mt-1 text-sm text-gray-500">
-                          Connect your LinkedIn account to enable content generation.
+                          Update your profile information and LinkedIn connection.
                         </p>
                       </div>
                       <button
-                        onClick={handleLinkedInConnect}
-                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        <LinkIcon className="h-4 w-4 mr-2 text-gray-400" />
-                        Connect LinkedIn
-                        <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-1 text-gray-400" />
+                        <PencilIcon className="h-4 w-4 mr-2" />
+                        Edit Profile
                       </button>
+                    </div>
+
+                    {profileData && (
+                      <div className="mt-6 border-t border-gray-200 pt-6">
+                        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                          <div>
+                            <dt className="text-sm font-medium text-gray-500">Full Name</dt>
+                            <dd className="mt-1 text-sm text-gray-900">{profileData.fullName}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm font-medium text-gray-500">Job Title</dt>
+                            <dd className="mt-1 text-sm text-gray-900">{profileData.jobTitle}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm font-medium text-gray-500">Industry</dt>
+                            <dd className="mt-1 text-sm text-gray-900">{profileData.industry}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-sm font-medium text-gray-500">Company</dt>
+                            <dd className="mt-1 text-sm text-gray-900">{profileData.company}</dd>
+                          </div>
+                        </dl>
+                      </div>
+                    )}
+
+                    <div className="mt-6 border-t border-gray-200 pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-900">LinkedIn Connection</h3>
+                          <p className="mt-1 text-sm text-gray-500">
+                            Connect your LinkedIn account to enable content generation.
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleLinkedInConnect}
+                          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          <LinkIcon className="h-4 w-4 mr-2 text-gray-400" />
+                          Connect LinkedIn
+                          <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-1 text-gray-400" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </Tab.Panel>
+              </Tab.Panel>
 
-            <Tab.Panel>
-              {/* Personas Content */}
-              <PersonaManager />
-            </Tab.Panel>
-          </Tab.Panels>
-        </Tab.Group>
+              <Tab.Panel>
+                {/* Personas Content */}
+                <PersonaManager />
+              </Tab.Panel>
+            </Tab.Panels>
+          </Tab.Group>
+        </div>
+
+        {isEditModalOpen && (
+          <EditProfileModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            profileData={profileData}
+            onProfileUpdate={handleProfileUpdate}
+          />
+        )}
       </div>
-
-      {isEditModalOpen && (
-        <EditProfileModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          profileData={profileData}
-          onProfileUpdate={handleProfileUpdate}
-        />
-      )}
     </div>
   );
 }
