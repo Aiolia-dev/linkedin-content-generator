@@ -144,6 +144,22 @@ export default function FinalConfigStep({
             <p className="font-medium text-gray-900">{data.userType || 'Not selected'}</p>
           </div>
           <div>
+            <p className="text-sm text-gray-700">
+              {data.userType === 'individual' ? 'Name' : 
+               data.userType === 'business' ? 'Company Name' : 
+               data.userType === 'agency' ? 'Agency Name' : ''}
+            </p>
+            <p className="font-medium text-gray-900">
+              {data.userType === 'individual' ? 
+                `${data.userInfo?.firstName || ''} ${data.userInfo?.lastName || ''}` :
+               data.userType === 'business' ? 
+                data.userInfo?.companyName :
+               data.userType === 'agency' ? 
+                data.userInfo?.agencyName : 
+                'Not provided'}
+            </p>
+          </div>
+          <div>
             <p className="text-sm text-gray-700">Content Tone</p>
             <p className="font-medium text-gray-900">{data.contentPreferences?.tone || 'Not selected'}</p>
           </div>

@@ -14,6 +14,28 @@ import { getLinkedInAuthUrl } from '@/lib/linkedin/linkedin';
 import { Tab } from '@headlessui/react';
 import clsx from 'clsx';
 
+const getDisplayName = (data: OnboardingData | null) => {
+  if (!data) return 'No name set';
+  
+  // Vérifier d'abord userInfo pour les utilisateurs email/password
+  if (data.userInfo) {
+    if (data.userType === 'individual' && data.userInfo.firstName && data.userInfo.lastName) {
+      return `${data.userInfo.firstName} ${data.userInfo.lastName}`;
+    } else if (data.userType === 'business' && data.userInfo.companyName) {
+      return data.userInfo.companyName;
+    } else if (data.userType === 'agency' && data.userInfo.agencyName) {
+      return data.userInfo.agencyName;
+    }
+  }
+  
+  // Si pas d'information dans userInfo, utiliser le displayName pour les utilisateurs OAuth
+  if (data.displayName) {
+    return data.displayName;
+  }
+  
+  return 'No name set';
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -28,7 +50,7 @@ export default function ProfilePage() {
         const data = userDoc.data();
         setProfileData({
           ...data,
-          displayName: data.displayName || '',
+          displayName: getDisplayName(data as OnboardingData),
           photoURL: data.photoURL || '',
           email: data.email || '',
           linkedinProfile: data.linkedinProfile || { connected: false, profileUrl: '', accessToken: '' },

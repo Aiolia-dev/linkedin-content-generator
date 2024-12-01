@@ -12,6 +12,12 @@ import RouteGuard from '@/components/auth/RouteGuard'; // Correction du chemin d
 
 export interface OnboardingData {
   userType: string;
+  userInfo: {
+    firstName?: string;
+    lastName?: string;
+    companyName?: string;
+    agencyName?: string;
+  };
   contentPreferences: {
     tone: 'professional' | 'casual' | 'technical';
     frequency: 'daily' | 'weekly' | 'monthly';
@@ -33,6 +39,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
     userType: '',
+    userInfo: {},
     contentPreferences: {
       tone: 'professional',
       frequency: 'weekly',
@@ -112,6 +119,7 @@ export default function OnboardingPage() {
       const userData = {
         onboardingCompleted: true,
         userType: onboardingData.userType,
+        userInfo: onboardingData.userInfo,
         contentPreferences: onboardingData.contentPreferences,
         linkedInProfile: onboardingData.linkedInProfile,
         preferences: onboardingData.preferences,
