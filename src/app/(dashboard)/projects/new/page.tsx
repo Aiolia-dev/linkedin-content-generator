@@ -35,7 +35,7 @@ const PROJECT_TYPES: {
     type: 'blog_article',
     description: 'Write in-depth articles',
     icon: DocumentTextIcon,
-    color: 'sky',
+    color: 'indigo',
   },
   {
     type: 'editorial_calendar',

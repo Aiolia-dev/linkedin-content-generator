@@ -140,7 +140,7 @@ export default function EditProfileModal({
                           <select
                             value={formData.userType}
                             onChange={(e) => handleInputChange('userType', '', e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="mt-1 block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                           >
                             <option value="individual">Individual</option>
                             <option value="business">Business</option>
@@ -169,7 +169,7 @@ export default function EditProfileModal({
                               onChange={(e) =>
                                 handleInputChange('contentPreferences', 'tone', e.target.value)
                               }
-                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                              className="block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                             >
                               <option value="professional">Professional</option>
                               <option value="casual">Casual</option>
@@ -188,7 +188,7 @@ export default function EditProfileModal({
                               onChange={(e) =>
                                 handleInputChange('contentPreferences', 'frequency', e.target.value)
                               }
-                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                              className="block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                             >
                               <option value="daily">Daily</option>
                               <option value="weekly">Weekly</option>
@@ -244,7 +244,7 @@ export default function EditProfileModal({
                               onChange={(e) =>
                                 handleInputChange('preferences', 'notifications', e.target.value)
                               }
-                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                              className="block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                             >
                               <option value="all">All Notifications</option>
                               <option value="important">Important Only</option>
@@ -262,7 +262,7 @@ export default function EditProfileModal({
                               onChange={(e) =>
                                 handleInputChange('preferences', 'aiAssistance', e.target.value)
                               }
-                              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                              className="block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-900"
                             >
                               <option value="high">High (More AI Suggestions)</option>
                               <option value="medium">Medium (Balanced)</option>

@@ -177,9 +177,18 @@ export default function GenerateContent() {
                 <h1 className="text-2xl font-semibold text-white mb-1">
                   {project.title || getProjectTitle(project.type)}
                 </h1>
-                <div className="flex items-center text-blue-100 text-sm">
-                  <ClockIcon className="h-4 w-4 mr-1" />
-                  <span>Created just now</span>
+                <div className="flex items-center text-blue-100 text-sm space-x-4">
+                  <div className="flex items-center">
+                    <ClockIcon className="h-4 w-4 mr-1" />
+                    <span>Created just now</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className={`inline-flex items-center px-2 py-0.5 rounded ${project.status === 'published' ? 'bg-green-500' : 'bg-gray-500'}`}>
+                      <span className="text-white text-xs font-medium">
+                        {project.status === 'published' ? 'Published' : 'Draft'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
