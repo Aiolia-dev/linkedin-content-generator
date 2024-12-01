@@ -62,7 +62,7 @@ export type ProjectContent =
   | { type: 'blog_article'; content: BlogArticleContent }
   | { type: 'editorial_calendar'; content: EditorialCalendarContent };
 
-export type ProjectStatus = 'draft' | 'published';
+export type ProjectStatus = 'draft' | 'published' | 'in_progress' | 'archived';
 
 export interface Project {
   id?: string;
