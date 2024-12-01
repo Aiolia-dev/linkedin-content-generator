@@ -87,7 +87,15 @@ export default function ProfilePage() {
           return;
         }
 
-        setProfileData(userData);
+        setProfileData({
+          ...userData,
+          displayName: getDisplayName(userData),
+          photoURL: userData.photoURL || '',
+          email: userData.email || '',
+          linkedinProfile: userData.linkedinProfile || { connected: false, profileUrl: '', accessToken: '' },
+          contentPreferences: userData.contentPreferences || { tone: 'professional', frequency: 'weekly', topics: [] },
+          preferences: userData.preferences || { notifications: 'important', aiAssistance: 'balanced' },
+        });
       } catch (error) {
         console.error('Error fetching profile data:', error);
       } finally {
