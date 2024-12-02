@@ -1,6 +1,6 @@
 import { collection, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db } from './config';
-import { Project } from '@/types/project';
+import { Project, Tone, ContentLengthConfig } from '@/types/project';
 import { getCurrentUser } from '../auth/session';
 
 export const createProject = async (projectData: Partial<Project>): Promise<string> => {
@@ -9,10 +9,19 @@ export const createProject = async (projectData: Partial<Project>): Promise<stri
     throw new Error('User must be authenticated to create a project');
   }
 
+  // Ensure required fields have default values
   const project = {
-    ...projectData,
-    userId: user.uid,
+    type: 'linkedin_post',
+    title: '',
+    subject: '',
+    tone: 'professional' as Tone,
+    contentLength: {
+      type: 'medium'
+    } as ContentLengthConfig,
+    keywords: [],
     status: 'draft',
+    ...projectData, // Allow overriding defaults with provided data
+    userId: user.uid,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };

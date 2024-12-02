@@ -1,8 +1,18 @@
-export type ProjectType = 'linkedin_post' | 'linkedin_carousel' | 'blog_article' | 'editorial_calendar';
+export type ProjectType = 'linkedin_post' | 'article';
 
 export type PostTone = 'inspiring' | 'instructive' | 'personal' | 'promotional' | 'engaging' | 'storytelling';
 export type PostLength = 'short' | 'medium' | 'long';
 export type PostFormality = 'formal_vous' | 'formal_tu' | 'informal_tu';
+
+export type Tone = 
+  | 'professional' 
+  | 'casual' 
+  | 'inspirational' 
+  | 'educational' 
+  | 'storytelling' 
+  | 'promotional';
+
+export type ContentLength = 'short' | 'medium' | 'long';
 
 export type ContentLengthType = 'short' | 'medium' | 'long' | 'custom';
 
@@ -68,36 +78,43 @@ export interface Project {
   id?: string;
   type: ProjectType;
   title?: string;
-  createdAt?: any; // Firestore Timestamp
-  updatedAt?: any; // Firestore Timestamp
-  userId?: string;
-  personaId?: string | null;
-  content: {
-    subject: string;
-    keywords: string;
-    tone: string;
-    targetAudience: string;
-    generatedContent: string;
-    contentLength: {
-      type: 'short' | 'medium' | 'long' | 'custom';
-      customWordCount?: number;
-    };
-  };
+  subject: string;
+  tone: Tone;
+  contentLength: ContentLengthConfig;
+  keywords: string[];
+  personaId?: string;
   status: ProjectStatus;
+  generatedContent?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  userId?: string;
 }
 
 // Couleurs par type de projet pour le dashboard
 export const PROJECT_TYPE_COLORS = {
   linkedin_post: 'blue',
-  linkedin_carousel: 'purple',
-  blog_article: 'green',
-  editorial_calendar: 'orange',
+  article: 'purple',
+} as const;
+
+// Configuration des longueurs de contenu
+export const CONTENT_LENGTH_CONFIG = {
+  short: { min: 100, max: 250 },
+  medium: { min: 300, max: 500 },
+  long: { min: 600, max: 1000 },
+} as const;
+
+// Configuration des tons
+export const TONE_DESCRIPTIONS = {
+  professional: 'Formel et business-oriented',
+  casual: 'Décontracté et conversationnel',
+  inspirational: 'Motivant et encourageant',
+  educational: 'Instructif et informatif',
+  storytelling: 'Narratif et engageant',
+  promotional: 'Persuasif et orienté conversion',
 } as const;
 
 // Libellés des types de projets
 export const PROJECT_TYPE_LABELS: Record<ProjectType, string> = {
   linkedin_post: 'Post LinkedIn',
-  linkedin_carousel: 'Carrousel LinkedIn',
-  blog_article: 'Article de Blog',
-  editorial_calendar: 'Calendrier Éditorial',
+  article: 'Article',
 } as const;

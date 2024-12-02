@@ -67,22 +67,13 @@ export default function ProjectForm({ type, onSubmit, disabled = false }: Projec
       }
     }
 
-    const contentLength = {
-      type: formData.contentLength.type,
-      customWordCount: formData.contentLength.type !== 'custom' ? null : (formData.contentLength.customWordCount || null)
-    };
-
     const cleanedData = {
       type,
-      content: {
-        subject: formData.subject,
-        keywords: formData.keywords,
-        tone: formData.tone,
-        targetAudience: formData.targetAudience,
-        generatedContent: '',
-        contentLength
-      },
-      personaId: formData.personaId || null,
+      subject: formData.subject,
+      keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k !== ''),
+      tone: formData.tone,
+      contentLength: formData.contentLength.type,
+      persona: formData.personaId || undefined,
       status: 'draft' as const
     };
 

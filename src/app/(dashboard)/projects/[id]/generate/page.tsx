@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Project } from '@/types/project';
 import { db } from '@/lib/firebase/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -18,41 +18,79 @@ import {
   PencilIcon
 } from '@heroicons/react/24/outline';
 import EditProjectModal from '@/components/projects/EditProjectModal';
+import { LinkedInPostSimulator } from '@/components/content/LinkedInPostSimulator';
+import { usePersona } from '@/hooks/usePersona';
 
 export default function GenerateContent() {
   const router = useRouter();
+  const params = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasGeneratedContent, setHasGeneratedContent] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<string>('');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // Get personaId from project once it's loaded
+  const personaId = !isLoading && project ? (project.personaId || project.persona) : undefined;
+  console.log('Project state:', { isLoading, project, personaId });
+  
+  const { persona, isLoading: isLoadingPersona } = usePersona(personaId);
+  console.log('Persona state:', { persona, isLoadingPersona, personaId });
 
   useEffect(() => {
-    const projectDataElement = document.getElementById('project-data');
-    if (!projectDataElement) {
-      setError('Project data not found');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const projectDataString = projectDataElement.getAttribute('data-project');
-      if (!projectDataString) {
-        throw new Error('Project data is empty');
+    const fetchProject = async () => {
+      if (!params.id) {
+        console.log('No project ID found in params');
+        setError('Project ID not found');
+        setIsLoading(false);
+        return;
       }
-      const projectData = JSON.parse(projectDataString);
-      setProject(projectData);
-      
-      // Check if project has generated content
-      checkGeneratedContent(projectData.id);
-    } catch (error) {
-      console.error('Error parsing project data:', error);
-      setError('Failed to load project details');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+
+      try {
+        console.log('Fetching project with ID:', params.id);
+        const projectRef = doc(db, 'projects', params.id as string);
+        const projectDoc = await getDoc(projectRef);
+        
+        if (!projectDoc.exists()) {
+          console.log('Project document not found');
+          throw new Error('Project not found');
+        }
+
+        const rawData = projectDoc.data();
+        console.log('Raw project data from Firestore:', rawData);
+        console.log('Project persona field:', rawData.persona);
+        console.log('Project personaId field:', rawData.personaId);
+
+        const projectData = {
+          id: projectDoc.id,
+          ...rawData,
+          createdAt: rawData.createdAt?.toDate(),
+          updatedAt: rawData.updatedAt?.toDate(),
+          // Ensure we get the persona ID from the correct field
+          personaId: rawData.personaId || rawData.persona
+        } as Project;
+
+        console.log('Setting project state with:', projectData);
+        console.log('Final personaId:', projectData.personaId);
+        setProject(projectData);
+        setIsLoading(false);
+        
+        if (projectData.generatedContent) {
+          setHasGeneratedContent(true);
+          setGeneratedContent(projectData.generatedContent);
+        }
+      } catch (error) {
+        console.error('Error fetching project:', error);
+        setError('Failed to load project details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProject();
+  }, [params.id]);
 
   const checkGeneratedContent = async (projectId: string) => {
     try {
@@ -79,9 +117,29 @@ export default function GenerateContent() {
     setError(null);
     
     try {
-      // TODO: Implement content generation API call
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated API call
-      console.log('Generate content for project:', project.id);
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projectType: project.type,
+          tone: project.tone,
+          subject: project.subject,
+          contentLength: project.contentLength,
+          keywords: project.keywords,
+          persona: project.persona,
+          projectId: project.id
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate content');
+      }
+
+      const data = await response.json();
+      setGeneratedContent(data.content);
+      setHasGeneratedContent(true);
     } catch (error) {
       console.error('Error generating content:', error);
       setError('Failed to generate content. Please try again.');
@@ -103,6 +161,21 @@ export default function GenerateContent() {
       default:
         return 'Untitled Project';
     }
+  };
+
+  const formatProjectType = (type: string): string => {
+    return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  const formatContentLength = (contentLength: ContentLengthConfig | undefined): string => {
+    if (!contentLength || !contentLength.type) return 'Not specified';
+    
+    if (contentLength.type === 'custom' && contentLength.wordCount) {
+      return `${contentLength.wordCount} words`;
+    }
+    
+    const type = contentLength.type;
+    return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   const handleEditClick = () => {
@@ -154,185 +227,100 @@ export default function GenerateContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <button
-          onClick={handleBack}
-          className="group flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-150"
-        >
-          <ArrowLongLeftIcon className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-150" />
-          <span>Back to Projects</span>
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={handleBack}
+            className="flex items-center text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLongLeftIcon className="w-5 h-5 mr-2" />
+            Back to Projects
+          </button>
+          <button
+            onClick={() => setIsEditModalOpen(true)}
+            className="flex items-center text-gray-600 hover:text-gray-900"
+          >
+            <PencilIcon className="w-5 h-5 mr-2" />
+            Edit Project
+          </button>
+        </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-white/10 rounded-lg backdrop-blur-sm">
-                <DocumentTextIcon className="h-8 w-8 text-white" />
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{project.title || getProjectTitle(project.type)}</h1>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-center space-x-2">
+                <DocumentTextIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700">Type: {formatProjectType(project?.type || '')}</span>
               </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-white mb-1">
-                  {project.title || getProjectTitle(project.type)}
-                </h1>
-                <div className="flex items-center text-blue-100 text-sm space-x-4">
-                  <div className="flex items-center">
-                    <ClockIcon className="h-4 w-4 mr-1" />
-                    <span>Created just now</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className={`inline-flex items-center px-2 py-0.5 rounded ${project.status === 'published' ? 'bg-green-500' : 'bg-gray-500'}`}>
-                      <span className="text-white text-xs font-medium">
-                        {project.status === 'published' ? 'Published' : 'Draft'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center space-x-2">
+                <SpeakerWaveIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700">Tone: {project?.tone}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <ClockIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700">Length: {formatContentLength(project?.contentLength)}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <LightBulbIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700">Subject: {project?.subject}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <TagIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700">Keywords: {project?.keywords?.join(', ')}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <SparklesIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-700">
+                  Persona: {
+                    isLoading 
+                      ? "Loading project..." 
+                      : isLoadingPersona 
+                        ? "Loading persona..." 
+                        : !personaId
+                          ? "Not specified"
+                          : persona?.title || "Error loading persona"
+                  }
+                </span>
               </div>
             </div>
-            <button
-              onClick={handleEditClick}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-150"
-              title="Edit project"
-            >
-              <PencilIcon className="h-5 w-5 text-white" />
-            </button>
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Project Type */}
-            <div className="flex items-start space-x-4 p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/30 border border-blue-100">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <PencilSquareIcon className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <h2 className="text-sm font-medium text-blue-900/60 mb-1">Project Type</h2>
-                <p className="text-blue-900 font-medium">{project.type}</p>
-              </div>
-            </div>
-
-            {/* Subject */}
-            {project.content?.subject && (
-              <div className="flex items-start space-x-4 p-6 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100/30 border border-purple-100">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <LightBulbIcon className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-medium text-purple-900/60 mb-1">Subject</h2>
-                  <p className="text-purple-900 font-medium">{project.content.subject}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Tone */}
-            {project.content?.tone && (
-              <div className="flex items-start space-x-4 p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100/30 border border-indigo-100">
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <SpeakerWaveIcon className="h-6 w-6 text-indigo-600" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-medium text-indigo-900/60 mb-1">Tone</h2>
-                  <p className="text-indigo-900 font-medium">{project.content.tone}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Content Length */}
-            {project.content?.contentLength && (
-              <div className="flex items-start space-x-4 p-6 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/30 border border-amber-100">
-                <div className="p-2 bg-amber-100 rounded-lg">
-                  <ClockIcon className="h-6 w-6 text-amber-600" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-medium text-amber-900/60 mb-1">Content Length</h2>
-                  <p className="text-amber-900 font-medium">
-                    {project.content.contentLength.type === 'custom' ? (
-                      `Custom (${project.content.contentLength.customWordCount} words)`
-                    ) : project.content.contentLength.type === 'short' ? (
-                      'Short (150-250 words)'
-                    ) : project.content.contentLength.type === 'medium' ? (
-                      'Medium (300-500 words)'
-                    ) : (
-                      'Long (600-1000 words)'
-                    )}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Keywords Section */}
-          {project.content?.keywords && (
-            <div className="mt-6 p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100/30 border border-green-100">
-              <div className="flex items-center mb-4">
-                <div className="p-2 bg-green-100 rounded-lg mr-3">
-                  <TagIcon className="h-6 w-6 text-green-600" />
-                </div>
-                <h2 className="text-sm font-medium text-green-900/60">Keywords</h2>
-              </div>
-              <div className="flex flex-wrap gap-2 ml-12">
-                {project.content.keywords.split(',').map((keyword, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-green-700 border border-green-200 shadow-sm hover:bg-green-50 transition-colors duration-150"
-                  >
-                    {keyword.trim()}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Action Section */}
-        <div className="border-t border-gray-100">
-          <div className="p-8 flex flex-col items-center space-y-4">
-            {hasGeneratedContent && (
-              <div className="flex items-center text-green-600 mb-2">
-                <CheckCircleIcon className="h-5 w-5 mr-2" />
-                <span className="text-sm">Content has already been generated for this project</span>
-              </div>
-            )}
+        {!hasGeneratedContent ? (
+          <div className="flex justify-center">
             <button
-              className={`
-                relative overflow-hidden group
-                ${isGenerating 
-                  ? 'bg-blue-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-blue-100'
-                }
-                text-white px-8 py-3.5 rounded-xl transition-all duration-200 flex items-center space-x-3
-              `}
               onClick={handleGenerateContent}
               disabled={isGenerating}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isGenerating ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                  <span className="font-medium">Generating Content...</span>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Generating...</span>
                 </>
               ) : (
                 <>
-                  <SparklesIcon className="h-5 w-5" />
-                  <span className="font-medium">{hasGeneratedContent ? 'Regenerate Content' : 'Generate Content'}</span>
-                  <div className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  <SparklesIcon className="w-5 h-5" />
+                  <span>Generate Content</span>
                 </>
               )}
             </button>
           </div>
-        </div>
+        ) : (
+          <LinkedInPostSimulator content={generatedContent} isLoading={isGenerating} />
+        )}
       </div>
 
-      {/* Edit Modal */}
       <EditProjectModal
-        project={project}
         isOpen={isEditModalOpen}
-        onClose={handleEditClose}
-        onSave={handleEditSave}
+        onClose={() => setIsEditModalOpen(false)}
+        project={project}
+        onProjectUpdated={(updatedProject) => setProject(updatedProject)}
       />
     </div>
   );
