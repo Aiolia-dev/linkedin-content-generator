@@ -11,16 +11,17 @@ export const createProject = async (projectData: Partial<Project>): Promise<stri
 
   // Ensure required fields have default values
   const project = {
-    type: 'linkedin_post',
-    title: '',
-    subject: '',
-    tone: 'professional' as Tone,
-    contentLength: {
-      type: 'medium'
-    } as ContentLengthConfig,
-    keywords: [],
+    type: projectData.type || 'linkedin_post',
+    content: {
+      title: projectData.subject || '',  // Utiliser le sujet comme titre par défaut
+      subject: projectData.subject || '',
+      tone: projectData.tone || 'professional' as Tone,
+      contentLength: projectData.contentLength || {
+        type: 'medium'
+      } as ContentLengthConfig,
+      keywords: projectData.keywords || [],
+    },
     status: 'draft',
-    ...projectData, // Allow overriding defaults with provided data
     userId: user.uid,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

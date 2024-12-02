@@ -4,7 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { Project } from '@/types/project';
 import { db } from '@/lib/firebase/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 
@@ -14,6 +14,7 @@ interface EditProjectModalProps {
   onClose: () => void;
   onSave?: () => void;
   onGenerateContent?: (projectId: string) => void;
+  onProjectUpdated?: (project: Project) => void;
 }
 
 const contentLengthOptions = [
@@ -31,7 +32,7 @@ const toneOptions = [
   { id: 'educational', name: 'Educational', description: 'Informative and instructive' }
 ];
 
-export default function EditProjectModal({ project, isOpen, onClose, onSave, onGenerateContent }: EditProjectModalProps) {
+export default function EditProjectModal({ project, isOpen, onClose, onSave, onGenerateContent, onProjectUpdated }: EditProjectModalProps) {
   const [formData, setFormData] = useState({
     subject: '',
     keywords: '',
@@ -46,16 +47,21 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
   const [customWordCount, setCustomWordCount] = useState<number | null>(null);
 
   useEffect(() => {
-    if (project && project.content) {
+    if (project) {
       setFormData({
-        subject: project.content.subject || '',
-        keywords: project.content.keywords || '',
-        tone: project.content.tone || '',
-        targetAudience: project.content.targetAudience || '',
-        contentLength: project.content.contentLength || { type: 'medium', customWordCount: null }
+        subject: project.content?.subject || '',
+        keywords: Array.isArray(project.content?.keywords) 
+          ? project.content.keywords.join(', ') 
+          : project.content?.keywords || '',
+        tone: project.content?.tone?.toLowerCase() || '',
+        targetAudience: project.content?.targetAudience || '',
+        contentLength: {
+          type: project.content?.contentLength?.type || 'medium',
+          customWordCount: project.content?.contentLength?.customWordCount || null,
+        }
       });
-      if (project.content.contentLength?.type === 'custom') {
-        setCustomWordCount(project.content.contentLength.customWordCount || null);
+      if (project.content?.contentLength?.type === 'custom') {
+        setCustomWordCount(project.content?.contentLength?.customWordCount || null);
       }
     }
   }, [project]);
@@ -92,54 +98,46 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
   const handleToneChange = (selectedTone: typeof toneOptions[0]) => {
     setFormData(prev => ({
       ...prev,
-      tone: selectedTone.name
+      tone: selectedTone.id
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
     if (!project) return;
 
-    setIsSaving(true);
     try {
       const projectRef = doc(db, 'projects', project.id);
-      
-      // Get the word count range based on content length type
-      const selectedOption = contentLengthOptions.find(opt => opt.id === formData.contentLength.type);
-      const wordCount = formData.contentLength.type === 'custom' 
-        ? formData.contentLength.customWordCount
-        : selectedOption 
-          ? Math.floor((selectedOption.minWords + selectedOption.maxWords) / 2) 
-          : null;
+      const updatedContent = {
+        ...project.content,
+        subject: formData.subject,
+        title: formData.subject,
+        keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k !== ''),
+        tone: toneOptions.find(t => t.id === formData.tone)?.name || formData.tone,
+        targetAudience: formData.targetAudience,
+        contentLength: formData.contentLength,
+      };
 
       const updatedProject = {
-        ...project,
-        content: {
-          ...project.content,
-          subject: formData.subject,
-          keywords: formData.keywords,
-          tone: formData.tone,
-          targetAudience: formData.targetAudience,
-          contentLength: {
-            type: formData.contentLength.type,
-            customWordCount: wordCount,
-            ...(selectedOption && {
-              minWords: selectedOption.minWords,
-              maxWords: selectedOption.maxWords
-            })
-          }
-        }
+        content: updatedContent,
+        updatedAt: new Date(),
       };
-      
+
       await updateDoc(projectRef, updatedProject);
+
+      // Récupérer le projet mis à jour
+      const updatedProjectDoc = await getDoc(projectRef);
+      const updatedProjectData = {
+        id: updatedProjectDoc.id,
+        ...updatedProjectDoc.data(),
+      } as Project;
+
       toast.success('Project updated successfully');
       if (onSave) onSave();
+      if (onProjectUpdated) onProjectUpdated(updatedProjectData);
       onClose();
     } catch (error) {
       console.error('Error updating project:', error);
       toast.error('Failed to update project');
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -172,10 +170,10 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                <div className="absolute right-0 top-0 pr-4 pt-4">
+                <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
                   <button
                     type="button"
-                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#196BF1] focus:ring-offset-2"
+                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
@@ -187,7 +185,10 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                     <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
                       Edit Project
                     </Dialog.Title>
-                    <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSave();
+                    }} className="mt-6 space-y-6">
                       <div className="mt-4 space-y-4">
                         <div>
                           <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
@@ -199,7 +200,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                             id="subject"
                             value={formData.subject}
                             onChange={handleChange}
-                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                           />
                         </div>
 
@@ -213,28 +214,24 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                             id="keywords"
                             value={formData.keywords}
                             onChange={handleChange}
-                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
-                            placeholder="Separate keywords with commas"
+                            placeholder="Enter keywords separated by commas"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                           />
                         </div>
 
-                        <div className="relative">
-                          <Listbox 
-                            value={toneOptions.find(t => t.name === formData.tone) || toneOptions[0]} 
-                            onChange={handleToneChange}
-                          >
-                            <Listbox.Label className="block text-sm font-medium text-gray-700">
-                              Tone
-                            </Listbox.Label>
+                        <div>
+                          <Listbox value={toneOptions.find(t => t.id === formData.tone) || toneOptions[0]} onChange={handleToneChange}>
+                            <Listbox.Label className="block text-sm font-medium text-gray-700">Tone</Listbox.Label>
                             <div className="relative mt-1">
-                              <Listbox.Button className="relative w-full h-10 cursor-pointer rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-[#196BF1] focus:outline-none focus:ring-1 focus:ring-[#196BF1] sm:text-sm">
-                                <span className="block truncate text-gray-900">
-                                  {(toneOptions.find(t => t.name === formData.tone) || { name: 'Select a tone' }).name}
+                              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm">
+                                <span className="block truncate text-gray-900 font-medium">
+                                  {toneOptions.find(t => t.id === formData.tone)?.name || 'Select a tone'}
                                 </span>
                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                   <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                                 </span>
                               </Listbox.Button>
+
                               <Transition
                                 as={Fragment}
                                 leave="transition ease-in duration-100"
@@ -246,24 +243,28 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                     <Listbox.Option
                                       key={tone.id}
                                       className={({ active }) =>
-                                        `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
-                                          active ? 'bg-[#196BF1]/10 text-[#196BF1]' : 'text-gray-900'
+                                        `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                                          active ? 'bg-blue-600 text-white' : 'text-gray-900'
                                         }`
                                       }
                                       value={tone}
                                     >
-                                      {({ selected }) => (
+                                      {({ selected, active }) => (
                                         <>
                                           <div className="flex flex-col">
-                                            <span className={`block truncate font-medium text-gray-900 ${selected ? 'font-semibold' : ''}`}>
+                                            <span className={`block truncate font-medium ${selected ? 'font-semibold' : ''}`}>
                                               {tone.name}
                                             </span>
-                                            <span className="block truncate text-xs text-gray-600">
+                                            <span className={`text-sm ${active ? 'text-blue-100' : 'text-gray-600'}`}>
                                               {tone.description}
                                             </span>
                                           </div>
                                           {selected ? (
-                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#196BF1]">
+                                            <span
+                                              className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                                                active ? 'text-white' : 'text-blue-600'
+                                              }`}
+                                            >
                                               <CheckIcon className="h-5 w-5" aria-hidden="true" />
                                             </span>
                                           ) : null}
@@ -287,7 +288,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                             id="targetAudience"
                             value={formData.targetAudience}
                             onChange={handleChange}
-                            className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                           />
                         </div>
 
@@ -389,7 +390,7 @@ export default function EditProjectModal({ project, isOpen, onClose, onSave, onG
                                     max="2000"
                                     value={customWordCount ?? ''}
                                     onChange={(e) => handleCustomWordCountChange(e.target.value ? Number(e.target.value) : null)}
-                                    className="mt-1 block w-full h-10 rounded-md border border-gray-300 px-3 shadow-sm focus:border-[#196BF1] focus:ring-[#196BF1] sm:text-sm text-gray-900"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                     placeholder="Enter word count (50-2000)"
                                   />
                                 </div>

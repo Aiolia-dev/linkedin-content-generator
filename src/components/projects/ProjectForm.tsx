@@ -69,11 +69,12 @@ export default function ProjectForm({ type, onSubmit, disabled = false }: Projec
 
     const cleanedData = {
       type,
+      title: formData.subject, // Utiliser le sujet comme titre
       subject: formData.subject,
       keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k !== ''),
       tone: formData.tone,
       contentLength: formData.contentLength.type,
-      persona: formData.personaId || undefined,
+      personaId: formData.personaId || null, // Utiliser null au lieu de undefined
       status: 'draft' as const
     };
 

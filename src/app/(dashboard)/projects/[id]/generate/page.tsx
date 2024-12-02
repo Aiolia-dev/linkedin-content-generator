@@ -15,7 +15,8 @@ import {
   PencilSquareIcon,
   ClockIcon,
   CheckCircleIcon,
-  PencilIcon
+  PencilIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import EditProjectModal from '@/components/projects/EditProjectModal';
 import { LinkedInPostSimulator } from '@/components/content/LinkedInPostSimulator';
@@ -227,62 +228,101 @@ export default function GenerateContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={handleBack}
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLongLeftIcon className="w-5 h-5 mr-2" />
-            Back to Projects
-          </button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <button
+          onClick={handleBack}
+          className="group flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors duration-200"
+        >
+          <ArrowLongLeftIcon className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-200" />
+          <span>Back to Projects</span>
+        </button>
+
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            {project?.content?.title || project?.content?.subject || 'New LinkedIn Post'}
+          </h1>
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center text-gray-600 hover:text-gray-900"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <PencilIcon className="w-5 h-5 mr-2" />
+            <PencilIcon className="h-4 w-4 mr-2" />
             Edit Project
           </button>
         </div>
 
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{project.title || getProjectTitle(project.type)}</h1>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-center space-x-2">
-                <DocumentTextIcon className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-700">Type: {formatProjectType(project?.type || '')}</span>
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="flex items-center space-x-2">
+              <DocumentTextIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Type</p>
+                <p className="text-sm text-gray-900">LinkedIn Post</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <SpeakerWaveIcon className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-700">Tone: {project?.tone}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <SpeakerWaveIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Tone</p>
+                <p className="text-sm text-gray-900">{project?.content?.tone || 'Not specified'}</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <ClockIcon className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-700">Length: {formatContentLength(project?.contentLength)}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <ClockIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Length</p>
+                <p className="text-sm text-gray-900">
+                  {(() => {
+                    const length = project?.content?.contentLength;
+                    if (!length) return 'Not specified';
+                    if (typeof length === 'string') return length;
+                    if (length.type === 'custom' && length.customWordCount) {
+                      return `${length.customWordCount} words`;
+                    }
+                    switch (length.type) {
+                      case 'short':
+                        return 'Short (150-250 words)';
+                      case 'medium':
+                        return 'Medium (300-500 words)';
+                      case 'long':
+                        return 'Long (600-1000 words)';
+                      default:
+                        return length.type;
+                    }
+                  })()}
+                </p>
               </div>
-              <div className="flex items-center space-x-2">
-                <LightBulbIcon className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-700">Subject: {project?.subject}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <TagIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Keywords</p>
+                <p className="text-sm text-gray-900">
+                  {Array.isArray(project?.content?.keywords) 
+                    ? project.content.keywords.join(', ') 
+                    : project?.content?.keywords || 'Not specified'}
+                </p>
               </div>
-              <div className="flex items-center space-x-2">
-                <TagIcon className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-700">Keywords: {project?.keywords?.join(', ')}</span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <LightBulbIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Subject</p>
+                <p className="text-sm text-gray-900">{project?.content?.subject || 'Not specified'}</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <SparklesIcon className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-700">
-                  Persona: {
-                    isLoading 
-                      ? "Loading project..." 
-                      : isLoadingPersona 
-                        ? "Loading persona..." 
-                        : !personaId
-                          ? "Not specified"
-                          : persona?.title || "Error loading persona"
-                  }
-                </span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <UserGroupIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Target Audience</p>
+                <p className="text-sm text-gray-900">
+                  {project?.content?.targetAudience || 'Not specified'}
+                </p>
               </div>
             </div>
           </div>

@@ -12,6 +12,21 @@ interface ProjectCardProps {
 }
 
 const getProjectPreview = (project: Project): string => {
+  if (!project.content) {
+    switch (project.type) {
+      case 'linkedin_post':
+        return 'New LinkedIn Post';
+      case 'linkedin_carousel':
+        return 'New Carousel';
+      case 'blog_article':
+        return 'New Blog Article';
+      case 'editorial_calendar':
+        return 'Editorial Calendar';
+      default:
+        return 'New Project';
+    }
+  }
+
   switch (project.type) {
     case 'linkedin_post':
       return (project.content as any).subject || 'New LinkedIn Post';
@@ -98,8 +113,11 @@ export default function ProjectCard({ project, onClick, onEdit, onDelete }: Proj
           </div>
           {getStatusBadge(project.status)}
         </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {(project.content?.title || project.title || getProjectPreview(project))}
+        </h3>
         <p className="text-gray-900 line-clamp-3">
-          {project.type === 'linkedin_post'
+          {project.type === 'linkedin_post' && project.content
             ? (project.content as any).generatedContent?.slice(0, 100) + '...'
             : getProjectPreview(project)}
         </p>

@@ -84,7 +84,11 @@ export interface Project {
   keywords: string[];
   personaId?: string;
   status: ProjectStatus;
-  generatedContent?: string;
+  content?: {
+    generatedContent?: string;
+    subject?: string;
+    title?: string;
+  };
   createdAt?: Date;
   updatedAt?: Date;
   userId?: string;
